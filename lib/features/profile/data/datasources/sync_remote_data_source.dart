@@ -8,7 +8,6 @@ class SyncRemoteDataSource {
 
   SyncRemoteDataSource(this._dioService);
 
-  /// Sync Categories Upload
   Future<List<String>> addCategories(
     List<Map<String, dynamic>> categories,
   ) async {
@@ -23,14 +22,11 @@ class SyncRemoteDataSource {
         if (data is Map && data['status'] == 'success') {
           syncedIds.add(category['id']);
         }
-      } catch (e) {
-        print("Failed to sync category ${category['id']}: $e");
-      }
+      } catch (_) {}
     }
     return syncedIds;
   }
 
-  /// Sync Transactions Upload
   Future<List<String>> addTransactions(
     List<Map<String, dynamic>> transactions,
   ) async {
@@ -47,7 +43,6 @@ class SyncRemoteDataSource {
     return [];
   }
 
-  /// Get Categories from Cloud
   Future<List<RemoteCategory>> getCategories(String userId) async {
     final response = await _dioService.get(
       UrlHelper.getCategories,
@@ -63,7 +58,6 @@ class SyncRemoteDataSource {
     return [];
   }
 
-  /// Get Transactions from Cloud
   Future<List<RemoteTransaction>> getTransactions(String userId) async {
     final response = await _dioService.get(
       UrlHelper.getTransactions,
@@ -77,15 +71,12 @@ class SyncRemoteDataSource {
       final transactions = list
           .map((json) => RemoteTransaction.fromJson(json))
           .toList();
-      print(
-        "Remote: Fetched ${transactions.length} transactions for user $userId. IDs: ${transactions.map((t) => t.id).toList()}",
-      );
+
       return transactions;
     }
     return [];
   }
 
-  /// Categories Delete
   Future<List<String>> deleteCategories(List<String> ids) async {
     List<String> deletedIds = [];
     for (var id in ids) {
@@ -103,21 +94,13 @@ class SyncRemoteDataSource {
         if (data is Map &&
             (data['message']?.toString().contains('not found') == true ||
                 data['messege']?.toString().contains('not found') == true)) {
-          print(
-            "Category already not on server, marking as deleted locally: $id",
-          );
           deletedIds.add(id);
-        } else {
-          print("Failed to delete remote category $id: $e");
         }
-      } catch (e) {
-        print("Failed to delete remote category $id: $e");
-      }
+      } catch (_) {}
     }
     return deletedIds;
   }
 
-  /// Transactions Delete
   Future<List<String>> deleteTransactions(List<String> ids) async {
     List<String> deletedIds = [];
     for (var id in ids) {
@@ -135,16 +118,9 @@ class SyncRemoteDataSource {
         if (data is Map &&
             (data['message']?.toString().contains('not found') == true ||
                 data['messege']?.toString().contains('not found') == true)) {
-          print(
-            "Transaction already not on server, marking as deleted locally: $id",
-          );
           deletedIds.add(id);
-        } else {
-          print("Failed to delete remote transaction $id: $e");
         }
-      } catch (e) {
-        print("Failed to delete remote transaction $id: $e");
-      }
+      } catch (_) {}
     }
     return deletedIds;
   }
